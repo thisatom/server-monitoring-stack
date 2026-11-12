@@ -1,0 +1,16 @@
+.env
+*.env
+!.env.example
+
+# Собранный конфиг Alertmanager содержит токен. В git только шаблон.
+alertmanager/alertmanager.yml
+
+# Локальные данные контейнеров, если кто-то запустит стек рядом с репозиторием
+data/
+
+# Скриншоты складываем в docs/images, сырые выгрузки Grafana не коммитим
+*.tmp
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc

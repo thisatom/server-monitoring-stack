@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Файлы и скрипты
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Тесты без Docker
+        run: python -m unittest discover -s tests -v
+
+  docker:
+    name: promtool, amtool, compose
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Скрыть фиктивный пароль в логе
+        run: echo "::add-mask::ci-only-password"
+      - name: Проверить конфиги официальными утилитами
+        run: sh scripts/check-docker.sh

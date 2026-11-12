@@ -1,0 +1,20 @@
+---
+description: Ограничения docker-compose для стека мониторинга
+globs: docker-compose*.yml
+alwaysApply: false
+---
+
+# Compose
+
+Сеть одна, имя `monitoring`. Сервисы ходят друг к другу по имени: `prometheus`, `alertmanager`, `node-exporter`, `grafana`.
+
+Публикуй на хост только так:
+
+```yaml
+ports:
+  - "127.0.0.1:3000:3000"   # grafana
+  - "127.0.0.1:9090:9090"   # prometheus
+  - "127.0.0.1:9093:9093"   # alertmanager
+```
+
+`node_exporter` наружу не публикуй: его скрейпит Prometheus внутри сети. Volume для данных Prometheus и Grafana — именованные. Секреты передавай через `env_file: .env`, не литералами.
