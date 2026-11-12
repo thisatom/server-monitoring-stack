@@ -1,0 +1,29 @@
+# Кого опрашивать и куда слать алерты.
+# Файл внутри контейнера: /etc/prometheus/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+rule_files:
+  - alert.rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  # Сам Prometheus. Если эта цель красная, сломался сбор метрик, а не VPS.
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+
+  # Метрики VPS. Имя node-exporter резолвится только внутри сети monitoring.
+  - job_name: node
+    static_configs:
+      - targets:
+          - node-exporter:9100

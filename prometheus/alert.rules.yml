@@ -1,0 +1,58 @@
+# Пять алертов VPS. Пороги и for зафиксированы в docs/DECISIONS.md.
+
+groups:
+  - name: node
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Нет ответа от {{ $labels.job }} ({{ $labels.instance }})"
+          description: "Prometheus не получает метрики уже больше минуты."
+
+      - alert: HighCpu
+        expr: >
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU выше 85% на {{ $labels.instance }}"
+          description: "Средняя загрузка процессора держится выше 85% уже пять минут."
+
+      - alert: HighMemory
+        expr: >
+          (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Память занята больше чем на 90% на {{ $labels.instance }}"
+          description: "Считаем доступную память MemAvailable: кэш Linux сюда не входит."
+
+      - alert: HighDisk
+        expr: >
+          (
+            1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}
+                / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}
+          ) * 100 > 85
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Диск {{ $labels.mountpoint }} заполнен больше чем на 85%"
+          description: "На {{ $labels.instance }} раздел {{ $labels.mountpoint }} занят больше 85% уже десять минут."
+
+      - alert: HighLoad
+        expr: >
+          node_load1
+            > on (instance)
+              count by (instance) (node_cpu_seconds_total{mode="idle"})
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Нагрузка выше числа ядер на {{ $labels.instance }}"
+          description: "Load average за 1 минуту больше, чем ядер у процессора, уже пять минут."

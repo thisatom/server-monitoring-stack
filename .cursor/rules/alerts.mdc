@@ -1,0 +1,19 @@
+---
+description: Пороги и имена алертов Prometheus для этого репозитория
+globs: prometheus/**/*.yml
+alwaysApply: false
+---
+
+# Алерты
+
+Файл правил: `prometheus/alert.rules.yml`. Группа `node`. Имена не переименовывай.
+
+| Алерт | Условие | for |
+|---|---|---|
+| InstanceDown | `up == 0` | 1m |
+| HighCpu | CPU > 85% | 5m |
+| HighMemory | RAM по MemAvailable > 90% | 5m |
+| HighDisk | занято > 85%, без tmpfs и overlay | 10m |
+| HighLoad | load1 больше числа ядер | 5m |
+
+`for` гасит короткие всплески. Память считай через `MemAvailable`, не через «всё минус free»: кэш Linux — не утечка. Пороги не меняй без правки `docs/DECISIONS.md` и README.
