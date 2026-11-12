@@ -74,6 +74,12 @@ class RenderAlertmanagerTest(unittest.TestCase):
         self.assertNotIn("__TELEGRAM_", rendered)
         self.assertNotIn(token, result.stdout)
         self.assertNotIn(token, result.stderr)
+        if os.name != "nt":
+            mode = (self.tmp / "alertmanager" / "alertmanager.yml").stat().st_mode & 0o777
+            self.assertTrue(
+                mode & 0o004,
+                f"пользователь nobody в контейнере не прочитает режим {oct(mode)}",
+            )
 
     def test_refuses_directory_left_by_docker(self) -> None:
         self.write_env("-100123")

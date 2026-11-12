@@ -71,8 +71,12 @@ def main() -> None:
         fail("В шаблоне остались плейсхолдеры. Файл не записан.")
 
     OUTPUT.write_text(rendered, encoding="utf-8")
+    # Образ prom/alertmanager работает от пользователя nobody, не от того,
+    # кто запустил скрипт. Режим 600 такой файл ему не отдаёт: контейнер
+    # и amtool падают с permission denied. 644 даёт прочитать конфиг внутри
+    # контейнера. В git файл не попадает: он в .gitignore.
     try:
-        OUTPUT.chmod(0o600)
+        OUTPUT.chmod(0o644)
     except OSError:
         pass
     print("Записал alertmanager/alertmanager.yml. В git его не добавляй: внутри токен.")
